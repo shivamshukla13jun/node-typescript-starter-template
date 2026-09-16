@@ -1,10 +1,14 @@
 import express, { Express } from "express";
+import path from "path";
+import fs from "fs";
 import cors from "cors";
 import helmet from "helmet";
 import compression from "compression";
-import config  from "config"
+import config  from "config/env"
 const {  UPLOAD_BASE_DIR } = config
 import { corsOptions } from "utils/CorsOptions";
+import { encryptionMiddleware } from "middlewares/encryption";
+import { getPublicKeyPem } from "libs/encryption";
 export const applyBaseSetup = (app: Express): void => {
   // Set view engine and trust proxy
   app.set('view engine', 'ejs');
@@ -70,6 +74,26 @@ export const applyBaseSetup = (app: Express): void => {
     limit: '10mb',
     parameterLimit: 1000
   }));
+
+  // Decrypt encrypted request payloads / encrypt responses when the
+  // client sends the `isencrypted` header (requires ENCRYPTION_ENABLED=true)
+  app.use(encryptionMiddleware);
+
+  // Public key the client uses to wrap its per-request AES session key
+  if (config.ENCRYPTION_ENABLED) {
+    app.get('/encryption/public-key', (_req, res) => {
+      res.type('text/plain').send(getPublicKeyPem());
+    });
+  }
+
+  // React demo of the encryption flow (same-origin → no CORS needed).
+  // Serves the Vite build when available, otherwise the raw example dir.
+  const demoDir = path.resolve(process.cwd(), 'examples/secure-frontend');
+  const demoDist = path.join(demoDir, 'dist');
+  const demoRoot = fs.existsSync(demoDist) ? demoDist : demoDir;
+  if (fs.existsSync(demoRoot)) {
+    app.use('/secure-demo', express.static(demoRoot));
+  }
 
   // Serve static files with proper headers
   app.use('/uploads', express.static(UPLOAD_BASE_DIR as string, {

@@ -1,6 +1,6 @@
 import amqplib, { Channel } from 'amqplib';
 import RabbitQueuesExchangesSetup from './RabbitQueuesExchangesSetup';
-import config from 'config';
+import config from 'config/env';
 
 class RabbitMQService {
   private static instance: RabbitMQService;

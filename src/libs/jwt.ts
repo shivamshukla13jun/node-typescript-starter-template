@@ -1,5 +1,5 @@
 import jwt, { JwtPayload, SignOptions } from 'jsonwebtoken';
-import config from 'config';
+import config from 'config/env';
 import Token from 'models/token.model';
 import { Types } from 'mongoose';
 

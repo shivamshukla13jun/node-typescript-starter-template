@@ -10,7 +10,8 @@ const userRegistrationSchema = z.object({
     .max(100, "Email must be at most 100 characters long"),
   password: z.string()
     .min(8, "Password must be at least 8 characters long"),
-  role: z.enum(Object.values(Role) as [string, ...string[]])
+  role: z.enum(Object.values(Role) as [string, ...string[]]),
+  avatar: z.string().optional()
 })
 
 const userUpdateSchema = z.object({
@@ -18,6 +19,7 @@ const userUpdateSchema = z.object({
   email: z.string().email("Email must be a valid email address").optional(),
   password: z.string().optional(),
   role: z.enum(Object.values(Role) as [string, ...string[]]).optional(),
+  avatar: z.string().optional(),
 })
 
 const ActiveUserSchema = z.object({

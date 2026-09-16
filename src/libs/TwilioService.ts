@@ -1,11 +1,10 @@
 // services/TwilioService.ts
 
-import { configDetails as config } from "@/config";
-import twilio from "twilio";
+import config from "config/env";
 
 class TwilioService {
   private static instance: TwilioService;
-  private client: twilio.Twilio | null = null;
+  private client: any = null;
   private senderNumber: string;
 
   private constructor() {
@@ -23,6 +22,8 @@ class TwilioService {
   private init() {
     try {
       if (config.TWILIO_SID && config.TWILIO_AUTH_TOKEN) {
+        // Loaded lazily so the app still boots when twilio isn't installed
+        const twilio = require("twilio");
         this.client = twilio(
           config.TWILIO_SID,
           config.TWILIO_AUTH_TOKEN

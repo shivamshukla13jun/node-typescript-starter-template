@@ -1,10 +1,10 @@
 import { createClient } from 'redis';
-import config from 'config';
-const  { REDIS_HOST, REDIS_PORT, REDIS_PASSWORD ,REDIS_UERNAME}=config
+import config from './env';
+const  { REDIS_HOST, REDIS_PORT, REDIS_PASSWORD ,REDIS_USERNAME}=config
 
 // Create a Redis client instance
 const redisClient = createClient({
-  username: REDIS_UERNAME,
+  username: REDIS_USERNAME,
   password: REDIS_PASSWORD,
   socket: {
     host: REDIS_HOST,

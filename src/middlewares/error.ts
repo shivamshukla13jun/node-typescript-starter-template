@@ -3,9 +3,9 @@ import { Request, Response, NextFunction } from "express";
 import { ZodError } from "zod";
 import mongoose from "mongoose";
 import { capitalizeFirstLetter } from "libs";
-import config from "config";
+import config from "config/env";
 import logger from "utils/logger";
-import fs from "fs"
+import { cleanupRequestFiles } from "./transaction";
 const duplicateKeyFieldUpdate = {
   companyId: "Company",
   name: "Name",
@@ -73,20 +73,11 @@ const errorHandler = (
   logger.error(err);
   let error = { ...err };
   error.message = err.message;
-  // check files are uploaded then remove them 
-  if (req.file) {
-    //  check esitst or not 
-    if (fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
-    }
-  }
-  if (req.files && Array.isArray(req.files)) {
-    req.files.map((file: Express.Multer.File) => {
-      if (fs.existsSync(file.path)) {
-        fs.unlinkSync(file.path);
-      }
-    });
-  }
+  // Roll back files uploaded during this request — removes the objects
+  // from the active storage provider and their File documents from the DB.
+  cleanupRequestFiles(req).catch((cleanupError) => {
+    logger.error(`File cleanup failed: ${cleanupError}`);
+  });
 
   // If error already is an AppError, use it directly
   if ('statusCode' in err && 'isOperational' in err) {

@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction } from "express";
-import multer from 'multer';
-import path from 'path';
 import { z } from 'zod';
-import { v4 as uuidv4 } from 'uuid';
-import rateLimit from 'express-rate-limit';
 import { AppError } from 'middlewares/error';
 import { verifyToken, verifyTokenInDatabase } from 'libs/jwt';
 import User, { IUserDocument } from 'models/user.model';
+import { upload } from './upload';
+import { withTransaction, cleanupRequestFiles, deleteFileOnCommit } from './transaction';
+import { encryptionMiddleware } from './encryption';
+
 declare global {
   namespace Express {
     interface Request {
@@ -14,17 +14,16 @@ declare global {
     }
   }
 }
-const mimeTypeMap: { [key: string]: string[] } = {
-    image: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'],
-    video: ['video/mp4', 'video/mpeg', 'video/quicktime', 'video/x-msvideo', 'video/webm'],
-    document: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/plain'],
-    audio: ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/webm', 'audio/aac']
-};
 
 export class Middleware {
     constructor() {
 
     }
+
+    static upload = upload;
+    static withTransaction = withTransaction;
+    static cleanupRequestFiles = cleanupRequestFiles;
+    static deleteFileOnCommit = deleteFileOnCommit;
 
     static verifyToken = async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -66,14 +65,26 @@ export class Middleware {
             next(error);
         }
     }
-    static requestValidate = (schema: z.ZodSchema) => async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            console.info('Original Request Body:', req.body);
-            req.body = await schema.parseAsync(req.body);
-            console.info('New Request Body:', req.body);
-            next();
-        } catch (err: any) {
-            next(err);
-        }
+    static encryption = encryptionMiddleware;
+
+    static requestValidate = (schema: z.ZodSchema) => {
+        const mw = async (req: Request, res: Response, next: NextFunction) => {
+            try {
+                console.info('Original Request Body:', req.body);
+                req.body = await schema.parseAsync(req.body);
+                console.info('New Request Body:', req.body);
+                next();
+            } catch (err: any) {
+                next(err);
+            }
+        };
+        // tagged so the auto-swagger generator can read the schema
+        (mw as any)._zodSchema = schema;
+        return mw;
     };
 }
+
+// tagged so the auto-swagger generator marks these routes as protected
+(Middleware.verifyToken as any)._requiresAuth = true;
+
+export { upload, withTransaction, cleanupRequestFiles, deleteFileOnCommit, encryptionMiddleware };

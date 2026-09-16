@@ -4,12 +4,14 @@ import { AppError } from "middlewares/error";
 import { createRegex, parseJSON } from "libs";
 import pagination from "utils/pagination";
 import { Role } from "microservices/auth-service/types";
-import mongoose, { Types } from "mongoose";
+import { Types } from "mongoose";
 import sendEmail from "libs/sendEmail";
 import path from "path";
 import ejs from "ejs";
 import { UserPermissionChecker } from "services/roleBaseAccessControl";
-import config from "config";
+import { deleteFileOnCommit } from "middlewares/transaction";
+import File from "models/file.model";
+import config from "config/env";
 
 /**
  * @description Get All Users
@@ -99,8 +101,8 @@ const createUser =
     // Permission checks
     const checker = new UserPermissionChecker(req.user?._id);
     await checker.canUserUpdate(targetRole);
-    let  user = await User.create(req.body)
-    user=user.toObject();
+    const created = await User.create([req.body], { session: req.dbSession });
+    const user = created[0].toObject();
     res.status(201).json({
       data: user,
       success: true,
@@ -148,10 +150,11 @@ const updateUser =
     const checker = new UserPermissionChecker(req.user?._id);
     await checker.canUserUpdate(targetRole);
 
-    const user = await User.findById(id);
+    const user = await User.findById(id).session(req.dbSession || null);
     if (!user) {
       throw new AppError("User not found", 404);
     }
+    const previousAvatar = user.avatar;
 
     // Update fields except password
     Object.entries(req.body).forEach(([key, value]) => {
@@ -164,7 +167,15 @@ const updateUser =
     if (req.body.password) {
       user.password = req.body.password;
     }
-    await user.save();
+    await user.save({ session: req.dbSession });
+
+    // Queue the replaced avatar for deletion once the transaction commits
+    if (req.body.avatar && previousAvatar && previousAvatar.toString() !== req.body.avatar.toString()) {
+      const oldFile = await File.findById(previousAvatar).session(req.dbSession || null);
+      if (oldFile) {
+        deleteFileOnCommit(req, { key: oldFile.key, provider: oldFile.provider, fileId: oldFile._id });
+      }
+    }
 
     res.status(200).json({
       data: user,
@@ -184,14 +195,11 @@ const updateUser =
  * @type DELETE 
  * @path /api/users/:id
  */
-const deleteUser = 
+const deleteUser =
   async (req: Request, res: Response, next: NextFunction): Promise<void>=> {
-    const { id } = req.params;
-    const transaction=await mongoose.startSession();
-    transaction.startTransaction();
    try {
-    
-    const user = await User.findByIdAndDelete(id,{session:transaction});
+    const { id } = req.params;
+    const user = await User.findByIdAndDelete(id,{session:req.dbSession});
 
     if (!user) {
       throw new AppError("User not found", 404);
@@ -200,8 +208,15 @@ const deleteUser =
     // Permission checks
     const checker = new UserPermissionChecker(req.user?._id);
     await checker.canUserUpdate(targetRole);
-      await transaction.commitTransaction();
-      transaction.endSession();
+
+    // Queue the user's avatar file for deletion once the transaction commits
+    if (user.avatar) {
+      const avatarFile = await File.findById(user.avatar).session(req.dbSession || null);
+      if (avatarFile) {
+        deleteFileOnCommit(req, { key: avatarFile.key, provider: avatarFile.provider, fileId: avatarFile._id });
+      }
+    }
+
     res
       .status(200)
       .json({
@@ -210,8 +225,6 @@ const deleteUser =
         statusCode: 200,
       });
    } catch (error) {
-     await transaction.abortTransaction();
-     transaction.endSession();
      next(error);
    }
   }

@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import config from 'config';
+import config from './env';
 const connectDB = async () => {
 return new Promise<void>((resolve, reject) => {
     mongoose.connect(config.MONGO_URI as string)

@@ -1,7 +1,7 @@
 import path from 'path';
 import ejs from 'ejs';
 import * as puppeteer from 'puppeteer';
-import config from 'config';
+import config from 'config/env';
 const broserconfig=config.isProduction?{
     executablePath: '/usr/bin/chromium-browser',
     headless: true,
@@ -39,7 +39,7 @@ async function generatePDFData({template, data, retries=3, delay=5000,async=fals
             const html = await renderHtml();
             const browser = await puppeteer.launch(broserconfig);
             const page = await browser.newPage();
-            await page.setContent(html, { waitUntil: 'networkidle0' });
+            await page.setContent(html, { waitUntil: 'networkidle0' as any });
 
             const pdfData = await page.pdf({
                 printBackground: true,

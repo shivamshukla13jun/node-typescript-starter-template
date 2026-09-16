@@ -1,6 +1,8 @@
 //@ts-nocheck
 import amqp, { Connection, Channel } from 'amqplib';
-import { RABBITMQ_URL, RABBITMQ_HOST, RABBITMQ_PORT, RABBITMQ_USERNAME, RABBITMQ_PASSWORD } from './index';
+import config from './env';
+
+const { RABBITMQ_URL, RABBITMQ_HOST, RABBITMQ_PORT, RABBITMQ_USERNAME, RABBITMQ_PASSWORD } = config;
 
 class RabbitMQConnection {
   private connection: Connection | null = null;

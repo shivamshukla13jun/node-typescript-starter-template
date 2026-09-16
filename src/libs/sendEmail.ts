@@ -1,7 +1,5 @@
 import * as nodemailer from 'nodemailer';
-import * as dotenv from 'dotenv';
-import config from 'config';
-dotenv.config();
+import config from 'config/env';
 
 const transporter = nodemailer.createTransport({
     host: config.EMAIL_HOST,
@@ -19,7 +17,7 @@ const sendEmail = async ({to,subject,html,attachments=[],cc,bcc}:{to: string, su
     try {
         console.log("email sent  to",to)
         const mailOptions: any = {
-            from: process.env.EMAIL_USER,
+            from: config.EMAIL_USER,
             to,
             subject,
             html,

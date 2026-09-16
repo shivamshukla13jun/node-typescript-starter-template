@@ -1,6 +1,6 @@
 
 import { createClient } from 'redis';
-import config from 'config';
+import config from 'config/env';
 const { REDIS_HOST, REDIS_PORT, REDIS_PASSWORD } =config
 const redisClient = createClient({
   password: REDIS_PASSWORD,

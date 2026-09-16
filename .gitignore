@@ -18,6 +18,10 @@ lerna-debug.log*
 .env.production.local
 *.env
 
+# encryption keys — never commit the private key
+keys/
+*.pem
+
 # Dependency directories
 
 dist

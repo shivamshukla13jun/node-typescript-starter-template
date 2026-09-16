@@ -2,7 +2,7 @@ import mongoose, { Document, Schema, Types } from 'mongoose';
 import bcrypt from 'bcrypt';
 import validator from 'validator';
 import {  Role, ROLES } from '../microservices/auth-service/types';
-import config from 'config';
+import config from 'config/env';
 
 export interface IUserDocument extends Document {
   name: string;
@@ -11,6 +11,7 @@ export interface IUserDocument extends Document {
   role: Role;  // Changed from Role[] to Role
   isActive: boolean;
   isBlocked: boolean;
+  avatar?: Types.ObjectId;
   createdBy?: Types.ObjectId;
   updatedBy?: Types.ObjectId;
   matchPassword(enteredPassword: string,password:string): Promise<boolean>;
@@ -60,6 +61,10 @@ const userSchema: Schema<IUserDocument> = new Schema(
       type: Boolean,
       default: false,
     },
+    avatar: {
+      type: Schema.Types.ObjectId,
+      ref: 'File',
+    },
     createdBy: {
       type: Schema.Types.ObjectId,
       ref: 'User',
@@ -90,7 +95,7 @@ userSchema.pre<IUserDocument>('save', async function (next) {
   if (!this.isModified('password')) {
     return next();
   }
-  const salt =config.SALT_ROUNDS
+  const salt =config.BCRYPT_ROUNDS
   this.password = await bcrypt.hash(this.password, salt);
   next();
 });

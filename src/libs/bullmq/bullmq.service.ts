@@ -1,5 +1,5 @@
 import { Queue, Worker, Job, QueueEvents } from 'bullmq';
-import config from 'config';
+import config from 'config/env';
 const { REDIS_HOST, REDIS_PORT, REDIS_PASSWORD } =config
 import { QUEUE_NAMES } from './constants';
 

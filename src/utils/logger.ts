@@ -1,4 +1,4 @@
-import config from 'config';
+import config from 'config/env';
 import winston from 'winston';
 
 const { combine, timestamp, json, colorize, printf, errors } = winston.format;
@@ -31,7 +31,7 @@ const transports: winston.transport[] = [
 
   // File transport for all logs
   new winston.transports.File({
-    filename: 'logs/combined.log',
+    filename: config.LOG_FILE,
     format: fileFormat,
     level: 'info',
   }),
@@ -49,7 +49,7 @@ if (ENABLE_ERROR_FILE_LOGGING) {
 }
 
 const logger = winston.createLogger({
-  level: config.NODE_ENV === 'production' ? 'info' : 'debug',
+  level: config.LOG_LEVEL,
   format: fileFormat,
   transports,
   exitOnError: false,

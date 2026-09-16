@@ -1,10 +1,8 @@
-// Define allowed origins
-const allowedOrigins = [
-  'http://localhost:5173',  // Allow this URL
-  'http://192.168.168.41:5175',  // Allow this URL
-  'https://.net', // You can add more URLs here
-  'https://staging.crm..net', // You can add more URLs here
-];
+import config from 'config/env';
+
+// Allowed origins come from CORS_ORIGIN (comma-separated) in the active .env file
+const allowedOrigins = config.CORS_ORIGIN;
+
 // CORS configuration
 const corsOptions = {
   origin: (origin: string, callback: Function) => {
@@ -14,11 +12,10 @@ const corsOptions = {
       callback(new Error('Not allowed by CORS')); // Block the request
     }
   },
-  // origin:"*",
-  credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+  credentials: config.CORS_CREDENTIALS, // Allow credentials (cookies, authorization headers, etc.)
 
   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'companyid', 'isencrypted'], // Allowed headers
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'companyid', 'isencrypted', 'x-ek'], // Allowed headers
 };
 
 export { corsOptions }
