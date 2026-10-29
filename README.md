@@ -1,6 +1,6 @@
 # E-commerce API — Node.js + TypeScript Starter
 
-Production-ready Express + MongoDB + TypeScript starter with pluggable file storage (local / AWS S3 / MinIO / Cloudinary / Firebase), MongoDB transaction-aware uploads with automatic rollback, hybrid RSA+AES payload encryption, and auto-generated Swagger docs.
+Production-ready Express + MongoDB + TypeScript starter with pluggable file storage (local / AWS S3 / Cloudinary / Firebase), MongoDB transaction-aware uploads with automatic rollback, hybrid RSA+AES payload encryption, and auto-generated Swagger docs.
 
 ## Features
 
@@ -10,7 +10,6 @@ Production-ready Express + MongoDB + TypeScript starter with pluggable file stor
   |---|---|---|
   | Local disk | `local` | writes under `UPLOAD_BASE_DIR`, served at `/uploads/*` |
   | AWS S3 | `s3` | `@aws-sdk/client-s3`, optional custom `AWS_S3_ENDPOINT` (S3-compatible) |
-  | MinIO | `minio` | auto-creates bucket, optional `MINIO_PUBLIC_URL` |
   | Cloudinary | `cloudinary` | `resource_type: auto`, folder via `CLOUDINARY_FOLDER` |
   | Firebase Storage | `firebase` | uses `firebase-admin` + `FIREBASE_STORAGE_BUCKET` |
 - **Upload middleware** — multer memory storage → provider upload → `File` document → file id written into `req.body[fieldName]`. Size + MIME whitelist from env.
@@ -33,7 +32,7 @@ src/
 │   ├── token.model.ts    # JWT access/refresh tokens (TTL index)
 │   └── file.model.ts     # stored file metadata (key, url, provider, size...)
 ├── libs/
-│   ├── storage/          # provider interface + local/s3/minio/cloudinary/firebase
+│   ├── storage/          # provider interface + local/s3/cloudinary/firebase
 │   │   ├── storage.service.ts
 │   │   └── providers/
 │   ├── encryption.ts     # RSA keypair mgmt, AES-256-GCM payload crypto
@@ -89,20 +88,9 @@ All values come from `.env.<NODE_ENV>` — nothing is hardcoded. See `.env.examp
 ### Switching storage provider
 
 ```env
-STORAGE_PROVIDER=minio   # local | s3 | minio | cloudinary | firebase
+STORAGE_PROVIDER=  # local | s3  | cloudinary | firebase
 ```
 
-Then fill that provider's block — e.g. MinIO:
-
-```env
-MINIO_ENDPOINT=localhost
-MINIO_PORT=9000
-MINIO_USE_SSL=false
-MINIO_ACCESS_KEY=minioadmin
-MINIO_SECRET_KEY=minioadmin
-MINIO_BUCKET=uploads
-MINIO_PUBLIC_URL=          # optional CDN/base override
-```
 
 ## File uploads + transactions
 

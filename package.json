@@ -41,7 +41,6 @@
     "firebase-admin": "^13.10.0",
     "helmet": "^7.0.0",
     "jsonwebtoken": "^9.0.3",
-    "minio": "^8.0.7",
     "mongoose": "^7.5.0",
     "morgan": "^1.10.0",
     "multer": "^2.4.0",

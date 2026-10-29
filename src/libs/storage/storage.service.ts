@@ -36,10 +36,6 @@ class StorageService {
           const { default: S3StorageProvider } = require('./providers/s3');
           return new S3StorageProvider();
         }
-        case 'minio': {
-          const { default: MinioStorageProvider } = require('./providers/minio');
-          return new MinioStorageProvider();
-        }
         case 'cloudinary': {
           const {
             default: CloudinaryStorageProvider,

@@ -26,14 +26,12 @@ function env(key: string, fallback?: string): string | undefined {
 export type StorageProviderName =
   | "local"
   | "s3"
-  | "minio"
   | "cloudinary"
   | "firebase";
 
 const STORAGE_PROVIDERS: StorageProviderName[] = [
   "local",
   "s3",
-  "minio",
   "cloudinary",
   "firebase",
 ];
@@ -101,15 +99,6 @@ const config = {
   AWS_S3_BUCKET: env("AWS_S3_BUCKET"),
   AWS_S3_ENDPOINT: env("AWS_S3_ENDPOINT"),
   AWS_PUBLIC_URL: env("AWS_PUBLIC_URL"),
-
-  MINIO_ENDPOINT: env("MINIO_ENDPOINT"),
-  MINIO_PORT: Number(env("MINIO_PORT", "9000")),
-  MINIO_USE_SSL: env("MINIO_USE_SSL") === "true",
-  MINIO_ACCESS_KEY: env("MINIO_ACCESS_KEY"),
-  MINIO_SECRET_KEY: env("MINIO_SECRET_KEY"),
-  MINIO_BUCKET: env("MINIO_BUCKET"),
-  MINIO_PUBLIC_URL: env("MINIO_PUBLIC_URL"),
-
   CLOUDINARY_CLOUD_NAME: env("CLOUDINARY_CLOUD_NAME"),
   CLOUDINARY_API_KEY: env("CLOUDINARY_API_KEY"),
   CLOUDINARY_API_SECRET: env("CLOUDINARY_API_SECRET"),

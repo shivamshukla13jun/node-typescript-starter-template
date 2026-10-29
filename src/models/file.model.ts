@@ -27,7 +27,7 @@ const fileSchema: Schema<IFileDocument> = new Schema(
     },
     provider: {
       type: String,
-      enum: ['local', 's3', 'minio', 'cloudinary', 'firebase'],
+      enum: ['local', 's3', 'cloudinary', 'firebase'],
       required: [true, 'Storage provider is required'],
     },
     originalName: {

@@ -2,10 +2,6 @@ import { Request, Response, NextFunction } from "express";
 import User,{IUserDocument} from "../../models/user.model";
 import { AppError } from "middlewares/error";
 import crypto from "crypto";
-import sendEmail from "libs/sendEmail";
-import config from "config/env";
-import ejs from "ejs";
-import path from "path";
 import { generateAccessToken, generateRefreshToken, saveTokenToDatabase, getTokenExpirationSeconds, revokeToken, verifyToken } from "libs/jwt";
 
 /**
