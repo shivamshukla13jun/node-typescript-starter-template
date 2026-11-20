@@ -49,6 +49,19 @@ const getAllUsers =
     const result = await User.aggregate([
       { $match: matchSatge },
       {
+        $lookup: {
+          from: 'files',
+          localField: 'avatar',
+          foreignField: '_id',
+          as: 'avatar',
+        },
+      },
+      {
+        $addFields: {
+          avatar: { $arrayElemAt: ['$avatar', 0] },
+        },
+      },
+      {
         $project: {
           password: 0,
           __v: 0,

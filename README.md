@@ -155,6 +155,18 @@ cd examples/secure-frontend && npm i && npm run dev   # http://localhost:5173 (v
 # or: npm run build → served same-origin at http://localhost:3000/secure-demo
 ```
 
+### Next.js client (reusable component library)
+
+`examples/nextjs-frontend/` is a Next.js (App Router + TS) example showcasing
+the full reusable toolkit: `SchemaForm` (zod schema → validated form),
+`MultiStepForm`, `DataTable`, UI primitives (Button/Input/Select/Modal/…),
+SEO (`metadata`, `robots.ts`, `sitemap.ts`, `manifest.ts`), and the same
+encrypted client. See `examples/nextjs-frontend/README.md` for the usage guide.
+
+```bash
+cd examples/nextjs-frontend && npm i && npm run dev   # http://localhost:3001 (proxies /api → :3000)
+```
+
 ## API endpoints
 
 | Method | Path | Auth | Body |

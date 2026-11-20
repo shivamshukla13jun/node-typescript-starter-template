@@ -11,6 +11,7 @@ import {
 
 import { authRegistrationSchema, authLoginSchema, authPasswordResetRequestSchema, authPasswordResetSchema } from './auth.validation';
 import { Middleware } from "middlewares";
+import { upload } from "middlewares/upload";
 import { createRateLimiter } from "middlewares/createRateLimiter";
 const router = Router();
 const loginLimiter = createRateLimiter({ limit: 5, windowMinutes: 15 }); // Example: 5 attempts per 15 minutes
@@ -20,7 +21,7 @@ const validateLogin = Middleware.requestValidate(authLoginSchema);
 const validatePasswordResetRequest = Middleware.requestValidate(authPasswordResetRequestSchema);
 const validatePasswordReset = Middleware.requestValidate(authPasswordResetSchema);
 
-router.post("/register", validateRegistration, registerUser);
+router.post("/register", upload.single('avatar', { folder: 'users', types: ['image'] }), validateRegistration, registerUser);
 router.post("/login", loginLimiter, validateLogin, loginUser);
 router.post("/logout",Middleware.verifyToken, logout);
 router.post('/refresh-token', refreshAccessToken);
